@@ -1,17 +1,19 @@
 // Define the maximum number of windows to open at once
-var maxWindowsOpen = 5;
+var maxWindowsOpen = 1;
 
 // Define the maximum number of cards to parse
-var maxCardsToParse = 10; // Change this value as needed
+var maxCardsToParse = 5; // Change this value as needed
+
+// Track the number of open windows
+var openWindowCount = 0;
+
 // Create an array to store extracted data from each URL
 var extractedDataArray = [];
 
-// Define the maximum number of windows to open
-var maxWindowCount = 5;
-
-//for now you can only have one or the other options
-outputOptionDumpAllData = false
+// for now, you can only have one or the other options
+outputOptionDumpAllData = false;
 outputOptionDbData = true;
+
 // Function to parse the main page for coupon cards
 async function parseMainPageForCouponCards() {
   const couponCards = document.querySelectorAll('.nodesListItem');
@@ -19,41 +21,65 @@ async function parseMainPageForCouponCards() {
     card.querySelector('a.node').getAttribute('href')
   );
 
-  // Use Promise.all to process the URLs with a maximum concurrency of maxWindowCount
+  // Use Promise.all to process the URLs
   await Promise.all(
     couponURLs.slice(0, maxCardsToParse).map(async couponURL => {
+      // Check if the maximum number of open windows is reached
+      if (openWindowCount >= maxWindowsOpen) {
+        // Wait for a window to close before opening a new one
+        await waitForOpenWindow();
+      }
+
       const data = await openAndExtractData(couponURL);
-	  console.log("Promise.all" + data)
-      //extractedDataArray.push(data);
+      console.log("Promise.all " + data);
     })
   );
 
   // Create a single JSON file with all data
   createJSONFile(extractedDataArray);
 }
-function waitForPopupLoad(popupWindow) {
+
+// Function to wait for an open window to close
+async function waitForOpenWindow() {
   return new Promise(resolve => {
-    popupWindow.addEventListener('load', () => {
-      resolve();
-    });
+    const checkInterval = setInterval(() => {
+      if (openWindowCount < maxWindowsOpen) {
+        clearInterval(checkInterval);
+        resolve();
+      }
+    }, 1000);
   });
 }
+
 // Function to open a URL in a new window and extract data
 async function openAndExtractData(couponURL) {
   const popupWindow = window.open(couponURL, '_blank');
+  openWindowCount++;
+
   try {
     // Wait for the popup window's document to fully load
-    await waitForPopupLoad(popupWindow);    // Extract and return the data
-    const data = await extractDataFromWindow(popupWindow, couponURL); // Pass couponURL as an argument
-      
+    await waitForPopupLoad(popupWindow);
+
+    // Extract and return the data
+    const data = await extractDataFromWindow(popupWindow, couponURL);
+
     // Wait for a certain condition (e.g., window closed) or a timeout
     await waitForWindowClose(popupWindow);
+
+    // Close the popup window
+    popupWindow.close();
+    openWindowCount--;
+
     return data;
   } catch (error) {
     console.error('Error in openAndExtractData:', error);
+    openWindowCount--; // Decrement the open window count on error
     return null; // Handle the error gracefully
   }
 }
+
+// Rest of the code remains the same...
+
 
 // Function to wait for a window to close
 function waitForWindowClose(window) {
