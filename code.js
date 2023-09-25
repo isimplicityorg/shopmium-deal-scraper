@@ -1,12 +1,19 @@
+// Define the maximum number of windows to open at once
+var maxWindowsOpen = 5;
+
+// Define the maximum number of cards to parse
+var maxCardsToParse = 10; // Change this value as needed
 // Create an array to store extracted data from each URL
 var extractedDataArray = [];
 
 // Define the maximum number of windows to open
 var maxWindowCount = 5;
 
+//for now you can only have one or the other options
+outputOptionDumpAllData = false
+outputOptionDbData = true;
 // Function to parse the main page for coupon cards
 async function parseMainPageForCouponCards() {
-  console.log(1)
   const couponCards = document.querySelectorAll('.nodesListItem');
   const couponURLs = Array.from(couponCards, card =>
     card.querySelector('a.node').getAttribute('href')
@@ -14,10 +21,10 @@ async function parseMainPageForCouponCards() {
 
   // Use Promise.all to process the URLs with a maximum concurrency of maxWindowCount
   await Promise.all(
-    couponURLs.slice(0, maxWindowCount).map(async couponURL => {
-      console.log(2)
+    couponURLs.slice(0, maxCardsToParse).map(async couponURL => {
       const data = await openAndExtractData(couponURL);
-      extractedDataArray.push(data);
+	  console.log("Promise.all" + data)
+      //extractedDataArray.push(data);
     })
   );
 
@@ -34,19 +41,13 @@ function waitForPopupLoad(popupWindow) {
 // Function to open a URL in a new window and extract data
 async function openAndExtractData(couponURL) {
   const popupWindow = window.open(couponURL, '_blank');
-console.log(3)
   try {
     // Wait for the popup window's document to fully load
     await waitForPopupLoad(popupWindow);    // Extract and return the data
     const data = await extractDataFromWindow(popupWindow, couponURL); // Pass couponURL as an argument
-    console.log(3.0)
       
     // Wait for a certain condition (e.g., window closed) or a timeout
     await waitForWindowClose(popupWindow);
-console.log(data)
-
-
-
     return data;
   } catch (error) {
     console.error('Error in openAndExtractData:', error);
@@ -56,7 +57,6 @@ console.log(data)
 
 // Function to wait for a window to close
 function waitForWindowClose(window) {
-  console.log(4)
   return new Promise(resolve => {
     
       if (window.closed) {
@@ -72,20 +72,16 @@ function waitForWindowClose(window) {
 // Function to extract data from a window
 async function extractDataFromWindow(window, couponURL) {
   return await extractAndLogInfo(window, couponURL); // Pass couponURL as an argument
-console.log(5)
 }
 
 // Function to extract data and log it
 async function extractAndLogInfo(popupWindow, couponURL) {
   // Extract data from the new window's document
-  console.log(popupWindow)
   var rebateElement = popupWindow.document.querySelector('.Offers-RebateLine.Offers-RebateLine--highlight');
-console.log(6 + rebateElement)
   if (rebateElement) {
     // Extract the content of the rebate element
     var rebateAmount = rebateElement.innerText.trim();
   }
-console.log(popupWindow.document)
   var brandNameElement = popupWindow.document.querySelector('.heading-block-title');
   var offerTitleElement = popupWindow.document.querySelector('.details-informations-title');
   var offerTermsElement = popupWindow.document.querySelector('.Offers-DetailsBlock__content p');
@@ -102,7 +98,7 @@ console.log(popupWindow.document)
   var buyInfo = buyElement ? buyElement.innerText.trim() : '';
   var restrictions = getRestrictionsPopup(popupWindow.document);
 
-  // Create an object to store the extracted data
+  if(outputOptionDumpAllData == true){
   var couponData = {
     rebateAmount,
     brandName,
@@ -114,13 +110,26 @@ console.log(popupWindow.document)
     restrictions,
     couponURL // Include the couponURL in the data
   };
-
-  // Push the data into the array
-  extractedDataArray.push(couponData);
+  }
+  if(outputOptionDbData == true)
+    {
+couponData = {
+      cashBack: rebateAmount,
+      offerName: offerTitle,
+      offerDetails: description,
+      expiration: offerEndTime,
+      insertDate: "DIGITAL",
+      insertId: "SHOPMIUM",
+      url: couponURL,
+      categories: "",
+      source: "SHOPMIUM",
+      couponId: Math.random().toString(36).substring(7),
+    };
+    }
+  if(couponData)extractedDataArray.push(couponData);
 
   // Save the data as JSON (you can modify this part to save data as needed)
   var jsonData = JSON.stringify(couponData);
-  console.log(jsonData);
 
   // Check if all URLs have been processed
   if (extractedDataArray.length === maxWindowCount) {
@@ -130,16 +139,15 @@ console.log(popupWindow.document)
 
   // After data extraction is complete, call the callback function
   //return extractedDataArray;
-  popupWindow.close(extractedDataArray);
+  popupWindow.close();
 }
 
 // Function to create a single JSON file with all data
 function createJSONFile(dataArray) {
-  console.log(7)
   
   // Convert the array of extracted data to a JSON string
   var jsonData = JSON.stringify(dataArray);
-
+console.log(jsonData)
   // Create a Blob from the JSON string
   var blob = new Blob([jsonData], { type: 'application/json' });
 
