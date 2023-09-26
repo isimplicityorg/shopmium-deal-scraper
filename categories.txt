@@ -1,0 +1,94 @@
+/*list of categories
+Alcohol & Tobacco
+Beverages
+Apparel
+Baby
+Candy
+Canned Goods
+Dairy
+Deli
+Diet & Energy
+Frozen
+Health & Beauty
+Holiday/Seasonal
+Laundry
+Household
+Meat
+Medicine
+Office & School Supplies
+Paper & Plastic
+Pets
+Snacks
+Vegan
+Vitamins
+Produce
+*/
+/*full lilst
+"categories"
+
+"Alcohol & Tobacco"
+"Alcohol & Tobacco,Beverages"
+"Alcohol & Tobacco,Canned Goods,Snacks"
+"Alcohol & Tobacco,Dairy,Deli,Grocery,Snacks"
+"Alcohol & Tobacco,Dairy,Snacks"
+"Alcohol & Tobacco,Frozen,Snacks"
+"Alcohol & Tobacco,Grocery"
+"Baby"
+"Baby,Dairy,Snacks"
+"Baby,Health & Beauty"
+"Bakery"
+"Beverages"
+"Beverages,Candy,Grocery"
+"Beverages,Dairy,Snacks"
+"Beverages,Dairy,Vegan"
+"Beverages,Diet & Energy"
+"Beverages,Diet & Energy,Vegan,Vitamins"
+"Beverages,Diet & Energy,Vitamins"
+"Candy"
+"Candy,Grocery,Snacks"
+"Candy,Snacks"
+"Canned Goods,Grocery"
+"Canned Goods,Grocery,Vegan"
+"Canned Goods,Snacks"
+"Cleaning & Home"
+"Condiments"
+"Dairy"
+"Dairy, Eggs & Cheese"
+"Dairy,Deli,Grocery,Snacks"
+"Dairy,Snacks"
+"Dairy,Vegan"
+"Deli Case"
+"Diet & Energy,Grocery"
+"Diet & Energy,Grocery,Health & Beauty,Snacks"
+"Diet & Energy,Grocery,Health & Beauty,Snacks,Vitamins"
+"Food"
+"Frozen Foods"
+"Grains, Pasta & Sides"
+"Grocery"
+"Grocery,Snacks"
+"Grocery,Vegan"
+"Health & Beauty"
+"Health & Beauty,Diet & Energy,Snacks,Grocery"
+"Health & Beauty,Holiday/Seasonal"
+"Health & Beauty,Household"
+"Health & Beauty,Household,Office & School Supplies,Paper & Plastic"
+"Health & Beauty,Medicine"
+"Health & Beauty,Medicine,Vitamins"
+"Health & Beauty,Store Coupons"
+"Health & Beauty,Vitamins"
+"Holiday/Seasonal,Restaurant,Snacks,Store Coupons"
+"Household"
+"Household,Paper & Plastic"
+"Household,Pets"
+"Laundry,Household"
+"Personal Care & Pharmacy"
+"Pet Care"
+"Pets"
+"Restaurant,Snacks"
+"Snack Foods"
+"Snacks,Vegan"
+"Spices & Baking"
+"Store Coupons"
+
+
+*/
