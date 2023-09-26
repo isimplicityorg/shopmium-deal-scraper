@@ -86,7 +86,7 @@ function openPopup(url, windowName) {
       extractDataFromPopup(popupWindow,arrCouponUrls[couponCount]);
   }
   
-  function extractDataFromPopup(popupWindow, couponURL) {
+ async function extractDataFromPopup(popupWindow, couponURL) {
     // Extract data from the new window's document
 		var rebateElement = popupWindow.document.querySelector('.Offers-RebateLine.Offers-RebateLine--highlight');
     var brandNameElement = popupWindow.document.querySelector('.heading-block-title');
@@ -124,6 +124,7 @@ function openPopup(url, windowName) {
     }
     if(outputOptionDbData == true)
       {
+         var categories  = await fetchProductType(detailsDescription);
   couponData = {
         cashBack: rebateAmount,
         offerName: brandName + " " + detailsDescription ,
@@ -132,7 +133,7 @@ function openPopup(url, windowName) {
         insertDate: "DIGITAL",
         insertId: "SHOPMIUM",
         url: couponURL,
-        categories: "",
+        categories: categories,
         source: "SHOPMIUM",
         couponId: Math.random().toString(36).substring(7),
       };
@@ -148,6 +149,43 @@ function openPopup(url, windowName) {
     closePopup();
   }
   
+
+var API_KEY = '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';  // Be cautious with this
+var OPENAI_ENDPOINT = 'https://api.openai.com/v1/chat/completions';
+
+async function fetchProductType(description) {
+  var promptText = `Act as my grocery store stock manager. Return the category for this product. "${description}". Only tell me the category in only 2 or 3 words. Example: Baby>Pampers`;
+  
+  var messages = [
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": promptText}
+    ];
+
+    try {
+        const response = await fetch(OPENAI_ENDPOINT, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${API_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              "model": "gpt-3.5-turbo",
+                "messages": messages,
+              "temperature": 0.7
+            })
+        });
+
+        const data = await response.json();
+        const productType = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content ? data.choices[0].message.content.trim() : "Unknown";
+        console.log(productType)
+        return productType;
+    }catch (error) {
+    console.error("Error fetching product type:", error);
+    console.error("Response:", response);
+}
+}
+
+
   
   function closePopup() {
     if (popupWindow && !popupWindow.closed) {
