@@ -150,7 +150,7 @@ function openPopup(url, windowName) {
   }
   
 
-var API_KEY = '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';  // Be cautious with this
+var API_KEY = '';  // Be cautious with this
 var OPENAI_ENDPOINT = 'https://api.openai.com/v1/chat/completions';
 
 async function fetchProductType(description) {
