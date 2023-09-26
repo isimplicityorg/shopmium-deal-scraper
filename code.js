@@ -1,3 +1,5 @@
+
+var limit = 2; // Optionally, set a limit on the number of coupons to return (e.g., 5)
 var arrCouponUrls = getCouponUrls();
 var couponCountTotal = arrCouponUrls.length;
 var popupWindow = null
@@ -14,9 +16,13 @@ openPopup(arrCouponUrls[couponCount], "couponwindow" );
 
 function cleanText(text) {
   // Remove non-printable characters and unwanted characters
-  if(text == "" || text == null)return;
+  if (text == "" || text == null) return;
   text = removeNonUTF8Chars(text);
-  return text.replace(/[^ -~]+/g, '');
+  //var newText = text.replace(/[^\s!*-~]+/g, '');
+  //var newText = text.replace(/[^ -~*]+/g, '');
+  var newText = text.replace(/[^\x20-\x7E]|\*/g, '')
+  console.log("newText = " + newText)
+  return newText;
 }
 
 function removeNonUTF8Chars(inputString) {
@@ -40,8 +46,7 @@ function getCouponUrls(){
     // Select all card elements with the class 'nodesListItem'
     var couponCards = document.querySelectorAll('.nodesListItem');
     
-    // Optionally, set a limit on the number of cards to return (e.g., 5)
-    var limit = 10;
+    
     
     // Convert the NodeList into an array and slice it to limit the number of cards
     if(limit == -1){
@@ -83,25 +88,24 @@ function openPopup(url, windowName) {
   
   function extractDataFromPopup(popupWindow, couponURL) {
     // Extract data from the new window's document
-    var rebateElement = popupWindow.document.querySelector('.Offers-RebateLine.Offers-RebateLine--highlight');
-    if (rebateElement) {
-      // Extract the content of the rebate element
-      var rebateAmount = rebateElement.innerText.trim();
-    }
+		var rebateElement = popupWindow.document.querySelector('.Offers-RebateLine.Offers-RebateLine--highlight');
     var brandNameElement = popupWindow.document.querySelector('.heading-block-title');
     var offerTitleElement = popupWindow.document.querySelector('.details-informations-title');
     var offerTermsElement = popupWindow.document.querySelector('.Offers-DetailsBlock__content p');
     var offerEndTimeElement = popupWindow.document.querySelector('.node_status__offer_details.time.offer-end');
-    var descriptionElement = popupWindow.document.querySelector('.heading-block-description.current');
+    var headingDescriptionElement = popupWindow.document.querySelector('.heading-block-description.current');
     var buyElement = popupWindow.document.querySelector('.Offers-RebateLine.Offers-RebateLine--after');
-  
+  	var detailsDescriptionElement = popupWindow.document.querySelector('.details-informations-container p');
+
     // Check if elements exist and extract their content
-    var brandName = brandNameElement ? cleanText(brandNameElement.textContent.trim()) : '';
-    var offerTitle = offerTitleElement ? cleanText(offerTitleElement.textContent.trim()) : '';
-    var offerTerms = offerTermsElement ? cleanText(offerTermsElement.textContent.trim() ): '';
+    var rebateAmount = rebateElement ? cleanText(rebateElement.innerText.trim()) : "Unknown";
+    var detailsDescription = detailsDescriptionElement ? cleanText(detailsDescriptionElement.textContent.trim()) : '';
+    var brandName = brandNameElement ? cleanText(brandNameElement.textContent.trim()) : 'Unknown';
+    var offerTitle = offerTitleElement ? cleanText(offerTitleElement.textContent.trim()) : 'Unknown';
+    var offerTerms = offerTermsElement ? cleanText(offerTermsElement.textContent.trim() ): 'Unknown';
     var offerEndTime = offerEndTimeElement ? cleanText(offerEndTimeElement.textContent.trim()) : 'NO EXPIRATION';
-    var description = descriptionElement ? cleanText(descriptionElement.textContent.trim()) : '';
-    var buyInfo = buyElement ? cleanText(buyElement.innerText.trim()) : '';
+    var headingDescription = headingDescriptionElement ? cleanText(headingDescriptionElement.textContent.trim()) : 'Unknown';
+    var buyInfo = buyElement ? cleanText(buyElement.innerText.trim()) : 'Unknown';
     var restrictions = cleanText(getRestrictionsPopup(popupWindow.document));
   
     if(outputOptionDumpAllData == true){
@@ -111,7 +115,8 @@ function openPopup(url, windowName) {
       offerTitle,
       offerTerms,
       offerEndTime,
-      description,
+      detailsDescription,
+      headingDescription,
       buyInfo,
       restrictions,
       couponURL // Include the couponURL in the data
@@ -121,7 +126,7 @@ function openPopup(url, windowName) {
       {
   couponData = {
         cashBack: rebateAmount,
-        offerName: description + " " + offerTitle ,
+        offerName: brandName + " " + detailsDescription ,
         offerDetails: offerTitle,
         expiration: offerEndTime,
         insertDate: "DIGITAL",
@@ -180,6 +185,8 @@ function openPopup(url, windowName) {
       // Log or use the extracted text as needed
       return popupText;
     }
+  }else{
+    return "";
   }
 }
 
