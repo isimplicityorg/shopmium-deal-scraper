@@ -21,9 +21,6 @@ function getNextCouponUrl() {
 function getCouponUrls() {
   // Select all card elements with the class 'nodesListItem'
   var couponCards = document.querySelectorAll('.nodesListItem');
-
-
-
   // Convert the NodeList into an array and slice it to limit the number of cards
   if (limit == -1) {
     var couponArray = Array.from(couponCards);
@@ -103,18 +100,19 @@ async function extractDataFromPopup(popupWindow, couponURL) {
     var postPrompt = ". Only tell me the category in only 2 or 3 words. Example: Baby>Pampers";
     var modelName = "gpt-3.5-turbo";
     var categories = await askGpt(prePrompt, detailsDescription, postPrompt, modelName);
-    couponData = {
-      cashBack: rebateAmount,
-      offerName: brandName + " " + detailsDescription,
-      offerDetails: offerTitle,
-      expiration: offerEndTime,
-      insertDate: "DIGITAL",
-      insertId: "SHOPMIUM",
-      url: couponURL,
-      categories: categories,
-      source: "SHOPMIUM",
-      couponId: createCouponId("cc-"),
-    };
+    items = [
+      rebateAmount,
+      brandName + " " + detailsDescription,
+      offerTitle,
+      offerEndTime,
+      "DIGITAL",
+      "SHOPMIUM",
+      couponURL,
+      categories,
+      "SHOPMIUM",
+      createCouponId("cc-")
+    ];
+    couponData = createDatabaseJson(items);
   }
   if (couponData) extractedDataArray.push(couponData);
 
@@ -164,86 +162,5 @@ function getRestrictionsPopup(doc) {
     }
   } else {
     return "";
-  }
-}
-
-//*******************utils.js*********************************************888
-// Function to create a single JSON file with all data
-function createJSONFile(dataArray) {
-
-  // Convert the array of extracted data to a JSON string
-  var jsonData = JSON.stringify(dataArray);
-  console.log(jsonData)
-  // Create a Blob from the JSON string
-  var blob = new Blob([jsonData], { type: 'application/json' });
-
-  // Create a URL for the Blob
-  var url = URL.createObjectURL(blob);
-
-  // Create a download link for the JSON file
-  var a = document.createElement('a');
-  a.href = url;
-  a.download = 'extracted_data.json';
-
-  // Trigger a click event on the download link to initiate the download
-  a.click();
-}
-
-function cleanText(text) {
-  // Remove non-printable characters and unwanted characters
-  if (text == "" || text == null) return;
-  text = removeNonUTF8Chars(text);
-  //var newText = text.replace(/[^\s!*-~]+/g, '');
-  //var newText = text.replace(/[^ -~*]+/g, '');
-  var newText = text.replace(/[^\x20-\x7E]|\*/g, '')
-  console.log("newText = " + newText)
-  return newText;
-}
-
-function removeNonUTF8Chars(inputString) {
-  console.log(inputString)
-
-  // Use a regular expression to match only UTF-8 characters
-  var utf8Regex = /[^\x00-\x7F]+/g;
-
-  // Replace all non-UTF-8 characters with an empty string
-  var cleanedString = inputString.replace(utf8Regex, '');
-
-  return cleanedString;
-}
-
-var API_KEY = '';  // Be cautious with this
-var OPENAI_ENDPOINT = 'https://api.openai.com/v1/chat/completions';
-
-async function askGpt(prePrompt, description, postPrompt, modelName) {
-if(API_KEY == '') return "Unknown";
-  var promptText = prePrompt + description + postPrompt;
-
-  var messages = [
-    { "role": "system", "content": "You are a helpful assistant." },
-    { "role": "user", "content": promptText }
-  ];
-
-  try {
-    const response = await fetch(OPENAI_ENDPOINT, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        "model": modelName,
-        "messages": messages,
-        "temperature": 0.7
-      })
-    });
-
-    const data = await response.json();
-    const productType = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content ? data.choices[0].message.content.trim() : "Unknown";
-    console.log(productType)
-    return productType;
-  } catch (error) {
-    console.error("Error fetching product type:", error);
-    console.error("Response:", response);
   }
 }
