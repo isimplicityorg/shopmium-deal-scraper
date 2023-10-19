@@ -102,7 +102,7 @@ async function extractDataFromPopup(popupWindow, couponURL) {
     var categories = await askGpt(prePrompt, detailsDescription, postPrompt, modelName);
     items = [
       rebateAmount,
-      brandName + " " + detailsDescription,
+      brandName + " | " + detailsDescription,
       offerTitle,
       offerEndTime,
       "DIGITAL",
